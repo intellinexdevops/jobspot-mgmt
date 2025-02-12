@@ -31,7 +31,7 @@ class StoreCareerRequest extends FormRequest
             'requirement' => 'required|string',
             'facilities' => 'nullable',
             'deadline' => 'required|date',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:active,inactive,draft',
             'salary' => 'required|string',
             'unit' => 'required|string|max:255',
             'skills' => 'required|exists:skills,id',
