@@ -112,7 +112,38 @@ class CareerController extends Controller
         try {
             $career = Career::find($request->id);
             $career->delete();
-            return ResponseHelper::success($career, 'Career deleted successfully', '200', 200);
+            return ResponseHelper::success(1, 'Career deleted successfully', '200', 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), '500', 500);
+        }
+    }
+
+    public function publish(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|exists:posts,id',
+        ]);
+
+        try {
+            $career = Career::find($validated['id']);
+            $career->status = 'active';
+            $career->save();
+            return ResponseHelper::success(1, 'Career published successfully', '200', 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), '500', 500);
+        }
+    }
+    public function draft(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|exists:posts,id',
+        ]);
+
+        try {
+            $career = Career::find($validated['id']);
+            $career->status = 'draft';
+            $career->save();
+            return ResponseHelper::success(1, 'Career draft successfully', '200', 200);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), '500', 500);
         }
@@ -415,7 +446,6 @@ class CareerController extends Controller
             200
         );
     }
-
     public function selectAll(Request $request)
     {
         $validated = $request->validate([
@@ -453,6 +483,7 @@ class CareerController extends Controller
             )
             ->where('posts.company_id', '=', $validated['company_id'])
             ->groupBy('posts.id')
+            ->orderBy('posts.created_at', 'desc')
             ->paginate(10);
 
         $careers->each(function ($career) {

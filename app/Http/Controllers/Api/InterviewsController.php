@@ -50,7 +50,8 @@ class InterviewsController extends Controller
             'interview_date' => "required|date",
             'interview_time' => "required",
             'location' => "required|string",
-            'comments' => "nullable|string"
+            'comments' => "nullable|string",
+            'interview_type' => "required|string"
         ]);
 
         try {
@@ -76,6 +77,7 @@ class InterviewsController extends Controller
                 'interview_time' => $validated['interview_time'],
                 'location' => $validated['location'],
                 'comments' => $validated['comments'] ?? null,
+                'interview_type' => $validated['interview_type'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

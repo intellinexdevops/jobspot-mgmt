@@ -198,7 +198,8 @@ class ApplicationController extends Controller
                 'u.nickname',
                 'u.avatar as user_avatar',
                 'p.title'
-            );
+            )
+            ->orderBy('a.created_at', 'desc');
         if ($request->has('status') && $request->status != "") {
             $applicantQuery->where('a.status', $request->status);
         }
@@ -224,15 +225,20 @@ class ApplicationController extends Controller
             ->join('posts as p', 'a.post_id', '=', 'p.id')
             ->join('locations as l', 'p.location_id', '=', 'l.id')
             ->join('companies as c', 'a.company_id', '=', 'c.id')
+            ->leftJoin('locations as cl', 'c.location_id', '=', 'cl.id')
+            ->leftJoin('interviews as in', 'u.id', '=', 'in.candidate_id')
             ->join('employment_type as ept', 'p.employment_type_id', '=', 'ept.id')
             ->join('experience_level as epl', 'p.experience_level_id', '=', 'epl.id')
             ->join('resume as r', 'a.resume_id', '=', 'r.id')
             ->where('a.id', $validated['id'])
             ->select(
                 'a.id',
+                'a.recruiter_id',
+                'u.id as candidate_id',
+                'a.post_id',
+                'a.company_id',
                 'a.status as status',
                 'u.nickname as candidate',
-                'u.id as candidate_id',
                 'u.mobile as candidate_mobile',
                 'u.email as candidate_email',
                 'ru.nickname as recruiter',
@@ -242,13 +248,20 @@ class ApplicationController extends Controller
                 'l.name as location',
                 'c.company_name',
                 'c.profile as company_profile',
+                'cl.name as company_location',
                 'ept.title as employment_type',
                 'epl.name as experience_level',
                 'r.filename as file_name',
                 'r.filepath as resume',
                 'r.created_at as upload_at',
                 'a.created_at as shipped_date',
-                'p.created_at as posted_date'
+                'p.created_at as posted_date',
+                'in.id as interview_id',
+                'in.interview_date',
+                'in.interview_time',
+                'in.status as interview_status',
+                'in.location as interview_location',
+                'in.interview_type'
             )
             ->first();
 
@@ -384,6 +397,10 @@ class ApplicationController extends Controller
             DB::table('application')
                 ->where('id', $validated['id'])
                 ->update(['status' => 'accepted']);
+
+            DB::table('interviews')
+                ->where('application_id', $validated['id'])
+                ->update(['status' => 1]);
 
 
             DB::table('notifications')
